@@ -15,8 +15,17 @@ var (
 	`)
 )
 
+// func main() {
+// 	runner := newRunner()
+// 	if err := runner.run(); err != nil {
+// 		fmt.Println(err)
+// 	}
+// }
+
+// Inject the database name to the runner during construction
 func main() {
-	runner := newRunner()
+	databaseName := "database.txt"
+	runner := newRunner(newFileDatabase(databaseName))
 	if err := runner.run(); err != nil {
 		fmt.Println(err)
 	}
@@ -26,8 +35,13 @@ type runner struct {
 	database fileDatabase
 }
 
-func newRunner() runner {
-	return runner{newFileDatabase()}
+// func newRunner() runner {
+// 	return runner{newFileDatabase()}
+// }
+
+// Refactor runner to accept db name during instantiation
+func newRunner(db fileDatabase) runner {
+	return runner{db}
 }
 
 func (r runner) run() error {
@@ -66,8 +80,8 @@ type fileDatabase struct {
 	filename string
 }
 
-func newFileDatabase() fileDatabase {
-	return fileDatabase{filename: "database.txt"}
+func newFileDatabase(filename string) fileDatabase {
+	return fileDatabase{filename}
 }
 
 func (db fileDatabase) Set(key string, value interface{}) error {
