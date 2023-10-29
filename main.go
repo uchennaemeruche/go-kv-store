@@ -31,8 +31,13 @@ func main() {
 	}
 }
 
+type datastore interface {
+	Set(string, interface{}) error
+	Get(string) (string, error)
+}
+
 type runner struct {
-	database fileDatabase
+	database datastore
 }
 
 // func newRunner() runner {
@@ -40,7 +45,7 @@ type runner struct {
 // }
 
 // Refactor runner to accept db name during instantiation
-func newRunner(db fileDatabase) runner {
+func newRunner(db datastore) runner {
 	return runner{db}
 }
 
