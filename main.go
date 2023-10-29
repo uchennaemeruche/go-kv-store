@@ -26,7 +26,9 @@ var (
 func main() {
 	databaseName := "database.txt"
 	runner := newRunner(newFileDatabase(databaseName))
-	if err := runner.run(); err != nil {
+
+	args := os.Args
+	if err := runner.run(args...); err != nil {
 		fmt.Println(err)
 	}
 }
@@ -49,8 +51,8 @@ func newRunner(db datastore) runner {
 	return runner{db}
 }
 
-func (r runner) run() error {
-	args := os.Args
+func (r runner) run(args ...string) error {
+	// args := os.Args
 	if len(args) < 3 {
 		return errUsage
 	}
