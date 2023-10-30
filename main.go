@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 )
@@ -28,7 +29,7 @@ func main() {
 	runner := newRunner(newFileDatabase(databaseName))
 
 	args := os.Args
-	if err := runner.run(args); err != nil {
+	if err := runner.run(os.Stdout, args); err != nil {
 		fmt.Println(err)
 	}
 }
@@ -51,7 +52,7 @@ func newRunner(db datastore) runner {
 	return runner{db}
 }
 
-func (r runner) run(args []string) error {
+func (r runner) run(output io.StringWriter, args []string) error {
 	// args := os.Args
 	if len(args) < 3 {
 		return errUsage
@@ -74,7 +75,9 @@ func (r runner) run(args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println(value)
+		// fmt.Println(value)
+		// output.Write([]byte(value + "\n"))
+		output.WriteString(value + "\n")
 
 	default:
 		return errUsage
