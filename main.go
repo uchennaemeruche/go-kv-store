@@ -13,6 +13,7 @@ var (
 	errUsage = errors.New(`usage: 
 	set <key> <value> Set specified key and value
 	get <key> 		  Get value for a given key
+	--help Show the acceptable commands
 	`)
 )
 
@@ -78,6 +79,9 @@ func (r runner) run(output io.StringWriter, args []string) error {
 		// fmt.Println(value)
 		// output.Write([]byte(value + "\n"))
 		output.WriteString(value + "\n")
+
+	case "--help":
+		return errUsage
 
 	default:
 		return errUsage
