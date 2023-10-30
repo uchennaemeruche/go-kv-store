@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"testing"
 )
@@ -22,7 +23,7 @@ func (m mockDatastore) Get(key string) (string, error) {
 func TestRunnerArgsErr(t *testing.T) {
 	r := newRunner(mockDatastore{})
 
-	if err := r.run([]string{}); err == nil {
+	if err := r.run(&bytes.Buffer{}, []string{}); err == nil {
 		t.Error("expected err on empty slice for args, got nil")
 	}
 
@@ -30,14 +31,14 @@ func TestRunnerArgsErr(t *testing.T) {
 
 func TestRunnerUsageErr(t *testing.T) {
 	r := newRunner(mockDatastore{})
-	if err := r.run([]string{"./kv", "help", "set"}); err == nil {
+	if err := r.run(&bytes.Buffer{}, []string{"./kv", "help", "set"}); err == nil {
 		t.Error("expected err on empty slice for args, got nil")
 	}
 }
 
 func TestRunnerSetMissingArgErr(t *testing.T) {
 	r := newRunner(mockDatastore{})
-	if err := r.run([]string{"./kv", "set", "me"}); err == nil {
+	if err := r.run(&bytes.Buffer{}, []string{"./kv", "set", "me"}); err == nil {
 		t.Error("expected err on empty slice for args, got nil")
 	}
 }
@@ -45,7 +46,7 @@ func TestRunnerSetMissingArgErr(t *testing.T) {
 func TestRunnerReturnsErrOnSet(t *testing.T) {
 	setErr := errors.New("set err")
 	r := newRunner(mockDatastore{setErr: setErr})
-	err := r.run([]string{"./kv", "set", "me", "10"})
+	err := r.run(&bytes.Buffer{}, []string{"./kv", "set", "me", "10"})
 	if err == nil {
 		t.Error("expected err on empty slice for args, got nil")
 	}
@@ -56,7 +57,7 @@ func TestRunnerReturnsErrOnSet(t *testing.T) {
 
 func TestRunnerGetTooManyArgsErr(t *testing.T) {
 	r := newRunner(mockDatastore{})
-	if err := r.run([]string{"./kv", "get", "school", "new"}); err == nil {
+	if err := r.run(&bytes.Buffer{}, []string{"./kv", "get", "school", "new"}); err == nil {
 		t.Error("expected err on empty slice for args, got nil")
 	}
 }
@@ -64,7 +65,7 @@ func TestRunnerGetTooManyArgsErr(t *testing.T) {
 func TestRunnerReturnErrOnGet(t *testing.T) {
 	getErr := errors.New("get err")
 	r := newRunner(mockDatastore{getErr: getErr, getStr: "10"})
-	err := r.run([]string{"./kv", "get", "me"})
+	err := r.run(&bytes.Buffer{}, []string{"./kv", "get", "me"})
 	if err == nil {
 		t.Error("expected err on empty slice for args, got nil")
 	}
@@ -75,9 +76,21 @@ func TestRunnerReturnErrOnGet(t *testing.T) {
 
 func TestRunnerGetReturnNilErr(t *testing.T) {
 	r := newRunner(mockDatastore{getStr: "10"})
-	err := r.run([]string{"./kv", "get", "me"})
+	err := r.run(&bytes.Buffer{}, []string{"./kv", "get", "me"})
 	if err != nil {
 		t.Error("expected err to be nil mock db get that returns a string but got an err")
+	}
+}
+
+func TestRunnerGetReturnsCorrectValue(t *testing.T) {
+	r := newRunner(mockDatastore{getStr: "10"})
+	buf := &bytes.Buffer{}
+	err := r.run(buf, []string{"./kv", "get", "me"})
+	if err != nil {
+		t.Error("expected err to be nil mock db get that returns a string but got an err")
+	}
+	if buf.String() != "10\n" {
+		t.Errorf("expected buffer value to be %v got %v", 10, buf.String())
 	}
 
 }
